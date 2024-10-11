@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微積分対応関数電卓</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .calculator {
+            width: 400px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        #display {
+            width: 100%;
+            height: 50px;
+            font-size: 24px;
+            text-align: right;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            width: 100%;
+            height: 50px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <input type="text" id="display" disabled>
+        <div class="buttons">
+            <button onclick="clearDisplay()">C</button>
+            <button onclick="deleteLast()">⌫</button>
+            <button onclick="appendToDisplay('(')">(</button>
+            <button onclick="appendToDisplay(')')">)</button>
+            <button onclick="appendToDisplay('Math.PI')">π</button>
+
+            <button onclick="appendToDisplay('7')">7</button>
+            <button onclick="appendToDisplay('8')">8</button>
+            <button onclick="appendToDisplay('9')">9</button>
+            <button onclick="appendToDisplay('/')">÷</button>
+            <button onclick="appendToDisplay('Math.E')">e</button>
+
+            <button onclick="appendToDisplay('4')">4</button>
+            <button onclick="appendToDisplay('5')">5</button>
+            <button onclick="appendToDisplay('6')">6</button>
+            <button onclick="appendToDisplay('*')">×</button>
+            <button onclick="appendToDisplay('^')">^</button>
+
+            <button onclick="appendToDisplay('1')">1</button>
+            <button onclick="appendToDisplay('2')">2</button>
+            <button onclick="appendToDisplay('3')">3</button>
+            <button onclick="appendToDisplay('-')">−</button>
+            <button onclick="appendToDisplay('Math.log(')">ln</button>
+
+            <button onclick="appendToDisplay('0')">0</button>
+            <button onclick="appendToDisplay('.')">.</button>
+            <button onclick="calculate()">=</button>
+            <button onclick="appendToDisplay('+')">+</button>
+            <button onclick="appendToDisplay('Math.exp(')">exp</button>
+
+            <button onclick="appendToDisplay('Math.sin(')">sin</button>
+            <button onclick="appendToDisplay('Math.cos(')">cos</button>
+            <button onclick="appendToDisplay('Math.tan(')">tan</button>
+            <button onclick="appendToDisplay('Math.asin(')">asin</button>
+            <button onclick="appendToDisplay('Math.acos(')">acos</button>
+
+            <button onclick="appendToDisplay('Math.atan(')">atan</button>
+            <button onclick="appendToDisplay('Math.sqrt(')">√</button>
+            <button onclick="appendToDisplay('factorial(')">n!</button>
+            <button onclick="appendToDisplay('Math.log10(')">log10</button>
+            <button onclick="appendToDisplay('%')">%</button>
+
+            <button onclick="calculateDerivative()">微分</button>
+            <button onclick="calculateIntegral()">積分</button>
+        </div>
+    </div>
+
+    <script>
+        function appendToDisplay(value) {
+            document.getElementById('display').value += value;
+        }
+
+        function clearDisplay() {
+            document.getElementById('display').value = '';
+        }
+
+        function deleteLast() {
+            let currentDisplay = document.getElementById('display').value;
+            document.getElementById('display').value = currentDisplay.slice(0, -1);
+        }
+
+        function calculate() {
+            let expression = document.getElementById('display').value;
+
+            // "^" をべき乗の演算子に変換
+            expression = expression.replace(/\^/g, '**');
+
+            try {
+                let result = eval(expression);
+                document.getElementById('display').value = result;
+            } catch (error) {
+                document.getElementById('display').value = 'Error';
+            }
+        }
+
+        // 階乗を計算する関数
+        function factorial(n) {
+            if (n === 0 || n === 1) {
+                return 1;
+            } else {
+                return n * factorial(n - 1);
+            }
+        }
+
+        // 数値微分の計算
+        function calculateDerivative() {
+            let expression = document.getElementById('display').value;
+            let x = prompt("微分する点 x の値を入力してください:");
+            x = parseFloat(x);
+
+            if (isNaN(x)) {
+                alert("有効な数値を入力してください。");
+                return;
+            }
+
+            let h = 1e-5;  // 微小な値
+            let f = function(x) {
+                return eval(expression.replace(/x/g, x));
+            };
+
+            // 数値微分（中央差分法）
+            let derivative = (f(x + h) - f(x - h)) / (2 * h);
+
+            document.getElementById('display').value = derivative;
+        }
+
+        // 数値積分の計算
+        function calculateIntegral() {
+            let expression = document.getElementById('display').value;
+            let a = prompt("積分の開始点 a の値を入力してください:");
+            let b = prompt("積分の終了点 b の値を入力してください:");
+
+            a = parseFloat(a);
+            b = parseFloat(b);
+
+            if (isNaN(a) || isNaN(b)) {
+                alert("有効な数値を入力してください。");
+                return;
+            }
+
+            let f = function(x) {
+                return eval(expression.replace(/x/g, x));
+            };
+
+            // 数値積分（台形法）
+            let n = 1000;  // 分割数
+            let h = (b - a) / n;
+            let integral = 0.5 * (f(a) + f(b));
+
+            for (let i = 1; i < n; i++) {
+                integral += f(a + i * h);
+            }
+
+            integral *= h;
+
+            document.getElementById('display').value = integral;
+        }
+    </script>
+</body>
+</html>
