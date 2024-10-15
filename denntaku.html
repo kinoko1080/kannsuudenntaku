@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高機能関数電卓</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .calculator {
+            width: 320px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        #display {
+            width: 100%;
+            height: 60px;
+            font-size: 24px;
+            border: none;
+            background-color: #f8f8f8;
+            text-align: right;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .var-inputs {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #eef;
+        }
+        .var-inputs input {
+            width: 45%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1px;
+            background-color: #ddd;
+        }
+        button {
+            border: none;
+            background-color: #fff;
+            font-size: 18px;
+            padding: 15px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #f0f0f0;
+        }
+        button:active {
+            background-color: #e0e0e0;
+        }
+        .operator {
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        .function {
+            background-color: #e8e8e8;
+            font-size: 16px;
+        }
+        .equals {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .equals:hover {
+            background-color: #45a049;
+        }
+        #result {
+            padding: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: right;
+            background-color: #e8f5e9;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <input type="text" id="display" readonly>
+        <div class="var-inputs">
+            <input type="number" id="x-input" placeholder="x の値">
+            <input type="number" id="y-input" placeholder="y の値">
+        </div>
+        <div class="buttons">
+            <button onclick="clearDisplay()" class="function">C</button>
+            <button onclick="backspace()" class="function">⌫</button>
+            <button onclick="addToDisplay('(')" class="operator">(</button>
+            <button onclick="addToDisplay(')')" class="operator">)</button>
+            <button onclick="addToDisplay('pi')" class="function">π</button>
+            
+            <button onclick="addToDisplay('7')">7</button>
+            <button onclick="addToDisplay('8')">8</button>
+            <button onclick="addToDisplay('9')">9</button>
+            <button onclick="addToDisplay('/')" class="operator">/</button>
+            <button onclick="addToDisplay('e')" class="function">e</button>
+            
+            <button onclick="addToDisplay('4')">4</button>
+            <button onclick="addToDisplay('5')">5</button>
+            <button onclick="addToDisplay('6')">6</button>
+            <button onclick="addToDisplay('*')" class="operator">×</button>
+            <button onclick="addToDisplay('^')" class="operator">^</button>
+            
+            <button onclick="addToDisplay('1')">1</button>
+            <button onclick="addToDisplay('2')">2</button>
+            <button onclick="addToDisplay('3')">3</button>
+            <button onclick="addToDisplay('-')" class="operator">-</button>
+            <button onclick="addToDisplay('ln')" class="function">ln</button>
+            
+            <button onclick="addToDisplay('0')">0</button>
+            <button onclick="addToDisplay('.')">.</button>
+            <button onclick="calculate()" class="equals">=</button>
+            <button onclick="addToDisplay('+')" class="operator">+</button>
+            <button onclick="addToDisplay('exp')" class="function">exp</button>
+            
+            <button onclick="addToDisplay('sin')" class="function">sin</button>
+            <button onclick="addToDisplay('cos')" class="function">cos</button>
+            <button onclick="addToDisplay('tan')" class="function">tan</button>
+            <button onclick="addToDisplay('asin')" class="function">asin</button>
+            <button onclick="addToDisplay('acos')" class="function">acos</button>
+            
+            <button onclick="addToDisplay('atan')" class="function">atan</button>
+            <button onclick="addToDisplay('sqrt')" class="function">√</button>
+            <button onclick="addToDisplay('factorial')" class="function">n!</button>
+            <button onclick="addToDisplay('log10')" class="function">log</button>
+            <button onclick="addToDisplay('%')" class="operator">%</button>
+            
+            <button onclick="addToDisplay('derivative')" class="function">d/dx</button>
+            <button onclick="addToDisplay('integrate')" class="function">∫</button>
+            <button onclick="addToDisplay('x')" class="function">x</button>
+            <button onclick="addToDisplay('y')" class="function">y</button>
+            <button onclick="addToDisplay('abs')" class="function">|x|</button>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const result = document.getElementById('result');
+        const xInput = document.getElementById('x-input');
+        const yInput = document.getElementById('y-input');
+
+        function addToDisplay(value) {
+            display.value += value;
+        }
+
+        function clearDisplay() {
+            display.value = '';
+            result.textContent = '';
+        }
+
+        function backspace() {
+            display.value = display.value.slice(0, -1);
+        }
+
+        function calculate() {
+            try {
+                const x = parseFloat(xInput.value) || 0;
+                const y = parseFloat(yInput.value) || 0;
+                const scope = {
+                    x: x,
+                    y: y,
+                    pi: Math.PI,
+                    e: Math.E
+                };
+
+                let expr = display.value;
+                
+                // Handle special functions
+                expr = expr.replace(/derivative\((.*?),(.*?)\)/g, 'derivative($1, $2)');
+                expr = expr.replace(/integrate\((.*?),(.*?),(.*?),(.*?)\)/g, 'integrate($1, $2, $3, $4)');
+
+                const evaluated = math.evaluate(expr, scope);
+                result.textContent = `結果: ${evaluated}`;
+            } catch (error) {
+                result.textContent = `エラー: ${error.message}`;
+            }
+        }
+
+        // カスタム関数の定義
+        math.import({
+            derivative: function(expr, variable) {
+                return math.derivative(expr, variable).toString();
+            },
+            integrate: function(expr, variable, start, end) {
+                return math.integrate(expr, variable, start, end);
+            }
+        });
+    </script>
+</body>
+</html>
